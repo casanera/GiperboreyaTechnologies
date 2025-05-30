@@ -107,12 +107,8 @@ func main() {
 	userStore := storage.NewPostgresUserStorage(db)
 
 	// Попытка создать таблицу users, если она не существует
-	if pgs, ok := userStore.(*storage.PostgresUserStorage); ok {
-		if err := pgs.CreateUsersTableIfNotExists(); err != nil {
-			log.Fatalf("Не удалось создать/проверить таблицу пользователей: %v", err)
-		}
-	} else {
-		log.Println("Предупреждение: не удалось привести userStore к *storage.PostgresUserStorage для создания таблицы.")
+	if err := userStore.CreateUsersTableIfNotExists(); err != nil {
+		log.Fatalf("Не удалось создать/проверить таблицу пользователей: %v", err)
 	}
 
 	// Инициализация обработчика
