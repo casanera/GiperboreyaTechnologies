@@ -116,30 +116,27 @@ func main() {
 
 	// Настройка маршрутизатора
 	mux := http.NewServeMux()
-	// Все запросы, начинающиеся с "/api/v1/users/", будут обрабатываться routeHandler
-	mux.HandleFunc("/api/v1/users/", routeHandler(userHandler))
 
-	// Простой обработчик для корневого пути, пока нет фронтенда
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		// Если это не API путь и не какой-то другой известный путь, то это корень
-		if r.URL.Path == "/" {
-			fmt.Fprint(w, "Backend API (team-user-management-app) запущен. Фронтенд будет добавлен позже.")
-		} else if !strings.HasPrefix(r.URL.Path, "/api/v1/users/") {
-			// Для других путей, не являющихся API и не "/", возвращаем 404
-			http.NotFound(w, r)
-		}
-		// API запросы уже обработаны выше
-	})
+	// API маршруты
+	mux.HandleFunc("/api/v1/users/", routeHandler(userHandler)) // routeHandler уже есть выше
+
+	// Раздача статических файлов для всех остальных путей
+	// Создаем обработчик для статических файлов из папки "static"
+	staticFileServer := http.FileServer(http.Dir("./static"))
+	// Все запросы, не начинающиеся с /api/, будут обработаны staticFileServer
+	// Если запрошен "/", FileServer автоматически попытается отдать "index.html" из "./static"
+	mux.Handle("/", staticFileServer) 
 
 	appPort := os.Getenv("APP_PORT")
 	if appPort == "" {
 		appPort = "8080"
 	}
 
-	log.Printf("Сервер backend (CRUD) запускается на http://localhost:%s", appPort)
+	log.Printf("Сервер (с фронтендом) запускается на http://localhost:%s", appPort)
 	log.Printf("API пользователей доступно по /api/v1/users")
+	log.Printf("Фронтенд доступен по адресу: http://localhost:%s/", appPort)
+
 
 	if err := http.ListenAndServe(":"+appPort, mux); err != nil {
 		log.Fatalf("Ошибка при запуске HTTP-сервера: %v", err)
 	}
-}
