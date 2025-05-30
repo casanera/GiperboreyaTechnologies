@@ -9,9 +9,28 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD:-supersecretpassword}
       POSTGRES_DB: ${DB_NAME:-team_app_db}
     ports:
-      - "5432:5432"
+      - "5432:5432" 
     volumes:
       - postgres_team_app_data:/var/lib/postgresql/data
+
+  backend: # Сервис для Go-приложения
+    build: . 
+    container_name: team_project_backend
+    restart: always
+    ports:
+      # Пробрасываем порт с хоста на порт контейнера
+      # ${EXTERNAL_APP_PORT:-8080} - порт на хосте, :8080 - порт внутри контейнера (EXPOSE в Dockerfile)
+      - "${EXTERNAL_APP_PORT:-8080}:8080" 
+    environment:
+      # Переменные для будущего подключения к БД 
+      DB_HOST: db 
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-teamadmin}
+      DB_PASSWORD: ${DB_PASSWORD:-supersecretpassword}
+      DB_NAME: ${DB_NAME:-team_app_db}
+      # APP_PORT здесь не нужен, т.к. внутренний порт захардкожен в main.go и Dockerfile
+    depends_on:
+      - db 
 
 volumes:
   postgres_team_app_data:
