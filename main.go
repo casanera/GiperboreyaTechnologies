@@ -17,49 +17,39 @@ import (
 
 var db *sql.DB
 
-// routeHandler будет диспетчеризировать запросы к UserHandler
 func routeHandler(userH *handlers.UserHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("API Запрос: Метод=%s, Путь=%s", r.Method, r.URL.Path)
 
-		// Только пути, начинающиеся с /api/v1/users
-		if !strings.HasPrefix(r.URL.Path, "/api/v1/users") {
-			log.Printf("Маршрут не API: %s, отдаем 404", r.URL.Path)
-			http.NotFound(w, r)
-			return
-		}
-
-		// Определяем, есть ли ID в пути /api/v1/users/{id}
-		// pathRemainder будет содержать ID или будет пустым/слешем
 		pathRemainder := strings.TrimPrefix(r.URL.Path, "/api/v1/users")
-		isSpecificUserPath := pathRemainder != "" && pathRemainder != "/"
+		isSpecificUserPath := pathRemainder != "" && pathRemainder != "/" // будет true для /1, /abc и т.д.
 
 		switch r.Method {
 		case http.MethodGet:
-			userH.GetUserHandler(w, r) // GetUserHandler сам разберет, всех или одного
+			userH.GetUserHandler(w, r) // GetUserHandler должен сам разобрать путь
 		case http.MethodPost:
-			// POST только на /api/v1/users (без ID)
-			if !isSpecificUserPath {
+			// POST только на /api/v1/users (т.е. pathRemainder должен быть "/" или "")
+			if !isSpecificUserPath || pathRemainder == "/" {
 				userH.CreateUserHandler(w, r)
 			} else {
 				http.Error(w, "Метод POST применим только к /api/v1/users", http.StatusMethodNotAllowed)
 			}
 		case http.MethodPut:
-			// PUT только на /api/v1/users/{id}
+			// PUT только на /api/v1/users/{id} (т.е. isSpecificUserPath должен быть true)
 			if isSpecificUserPath {
 				userH.UpdateUserHandler(w, r)
 			} else {
-				http.Error(w, "Для PUT запроса требуется ID пользователя в пути (например, /api/v1/users/123)", http.StatusBadRequest)
+				http.Error(w, "Для PUT запроса требуется ID пользователя в пути", http.StatusBadRequest)
 			}
 		case http.MethodDelete:
 			// DELETE только на /api/v1/users/{id}
 			if isSpecificUserPath {
 				userH.DeleteUserHandler(w, r)
 			} else {
-				http.Error(w, "Для DELETE запроса требуется ID пользователя в пути (например, /api/v1/users/123)", http.StatusBadRequest)
+				http.Error(w, "Для DELETE запроса требуется ID пользователя в пути", http.StatusBadRequest)
 			}
 		default:
-			http.Error(w, "Метод не разрешен для данного пути", http.StatusMethodNotAllowed)
+			http.Error(w, "Метод не разрешен для данного API пути", http.StatusMethodNotAllowed)
 		}
 	}
 }
@@ -125,7 +115,7 @@ func main() {
 	staticFileServer := http.FileServer(http.Dir("./static"))
 	// Все запросы, не начинающиеся с /api/, будут обработаны staticFileServer
 	// Если запрошен "/", FileServer автоматически попытается отдать "index.html" из "./static"
-	mux.Handle("/", staticFileServer) 
+	mux.Handle("/", staticFileServer)
 
 	appPort := os.Getenv("APP_PORT")
 	if appPort == "" {
@@ -136,7 +126,7 @@ func main() {
 	log.Printf("API пользователей доступно по /api/v1/users")
 	log.Printf("Фронтенд доступен по адресу: http://localhost:%s/", appPort)
 
-
 	if err := http.ListenAndServe(":"+appPort, mux); err != nil {
 		log.Fatalf("Ошибка при запуске HTTP-сервера: %v", err)
 	}
+}
