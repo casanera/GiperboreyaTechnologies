@@ -11,8 +11,8 @@ import (
 
 	_ "github.com/lib/pq"
 
-	"github.com/DogeNyan/GiperboreyaTechnologies/internal/handlers"
-	"github.com/DogeNyan/GiperboreyaTechnologies/internal/storage"
+	"github.com/casanera/GiperboreyaTechnologies/internal/handlers"
+	"github.com/casanera/GiperboreyaTechnologies/internal/storage"
 )
 
 var db *sql.DB
