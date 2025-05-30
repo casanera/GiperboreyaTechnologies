@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/DogeNyan/GiperboreyaTechnologies/internal/models"
-	"github.com/DogeNyan/GiperboreyaTechnologies/internal/storage"
+	"github.com/casanera/GiperboreyaTechnologies/internal/models"
+	"github.com/casanera/GiperboreyaTechnologies/internal/storage"
 )
 
 type UserHandler struct {

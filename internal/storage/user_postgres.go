@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/DogeNyan/GiperboreyaTechnologies/internal/models"
+	"github.com/casanera/GiperboreyaTechnologies/internal/models"
 
 	_ "github.com/lib/pq" // Драйвер PostgreSQL
 )
