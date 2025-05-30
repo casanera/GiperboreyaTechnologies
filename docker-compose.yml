@@ -1,0 +1,17 @@
+
+services:
+  db:
+    image: postgres:14-alpine
+    container_name: team_project_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-teamadmin}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-supersecretpassword}
+      POSTGRES_DB: ${DB_NAME:-team_app_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_team_app_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_team_app_data:
